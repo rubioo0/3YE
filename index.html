@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Наші 3 роки</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/uk.js"></script>
+
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #b1d0e0, #b9b6b6);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #333;
+      }
+
+      h1 {
+        margin: 20px;
+        font-size: 2.5em;
+        color: #333;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      #calendar-year {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 20px;
+        justify-content: center;
+        max-width: 1200px;
+        padding: 20px;
+      }
+
+      .month-calendar {
+        width: 100%;
+        max-width: 400px;
+        background-color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .month-calendar:hover {
+        transform: scale(1.05);
+      }
+
+      #year-navigation {
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      button {
+        padding: 12px 24px;
+        font-size: 18px;
+        margin: 0 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        pointer-events: none;
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 30px;
+        border-radius: 12px;
+        width: 80%;
+        max-width: 450px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        pointer-events: all;
+      }
+
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+
+      .close:hover {
+        color: #000;
+      }
+
+      .disable-interaction {
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      p {
+        font-size: 1.1em;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Наші 3 роки</h1>
+    <div id="year-navigation">
+      <button id="prev-months">Попередні 3 місяці</button>
+      <span id="year-display">2021</span>
+      <button id="next-months">Наступні 3 місяці</button>
+    </div>
+
+    <div id="calendar-year">
+      <div id="month-01" class="month-calendar"></div>
+      <div id="month-02" class="month-calendar"></div>
+      <div id="month-03" class="month-calendar"></div>
+      <div id="month-04" class="month-calendar"></div>
+      <div id="month-05" class="month-calendar"></div>
+      <div id="month-06" class="month-calendar"></div>
+      <div id="month-07" class="month-calendar"></div>
+      <div id="month-08" class="month-calendar"></div>
+      <div id="month-09" class="month-calendar"></div>
+      <div id="month-10" class="month-calendar"></div>
+      <div id="month-11" class="month-calendar"></div>
+      <div id="month-12" class="month-calendar"></div>
+    </div>
+
+    <div id="date-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Обрана дата</h2>
+        <p id="modal-date-info"></p>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        let currentYear = 2021;
+        const startYear = 2021;
+        const endYear = 2100;
+        let currentMonthIndex = 8; // Start from September (index 8)
+        const monthsPerPage = 3;
+
+        const modal = document.getElementById("date-modal");
+        const span = document.getElementsByClassName("close")[0];
+        const modalDateInfo = document.getElementById("modal-date-info");
+        const calendarYear = document.getElementById("calendar-year");
+        const yearDisplay = document.getElementById("year-display");
+
+        const dateDescriptions = {
+          "2021-09-23": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-22": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-21": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-20": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-19": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-18": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-17": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-16": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-15": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-14": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-13": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-12": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-11": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-10": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-09": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-08": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-07": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-06": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-05": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-04": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-03": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-02": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-01": "Тут ми ще з тобою не знайомі :)",
+          "2021-09-24":
+            "Тут ми з тобою говорили про математику, про те, що ніхто з нас не знає топ-5 теорем з геометрії. Потім обговорювали калуш і концерти. Говорили про музику, а ти питала, чи я зі Львова. Ми також обговорювали райони Львова та плани на майбутнє, включаючи навчання і вибір університету. Ти сказала, що вчишся на юридичному, але сумніваєшся в перспективах, і найважливіше для тебе — це скласти ЗНО. Далі була розмова про дитячий садок, а також я розказав про садок з афроамериканцями, де я був єдиним білим. Так ми і познайомились",
+          "2021-09-25":
+            "Тут ми жартували, згадали за інсту. Ми обговорювали сни, пріколи про голих парубків і поросят. Потім ми говорили про психологію, фантазії ( розумієш які ), орієнтації і толерантності, багато сміялись. Ти сказала що виправиш мене, думаю пам'ятаєш, я тоді сказав шо я підарас. Сказала зміниш орієнтацію. Багато жартували, записували голосові, жартували.",
+          "2021-09-26":
+            "В нас тут була реально весела розмова. Ми ділились моментами з життя, жартували, обговорювали голубці. обговорювали перемогу Усика над Ентоні Джошуа. Ми двоє були в захваті. Потім ми говорили про спорт. Я сказав про карате і грушу вдома. Ми жартували і намагались придумати придумати оригінальні ніки для один одного, бабінсайдер і голубець. Говорили про особисті стосунки, ти казала про стосунки з мамою та святкування її дня народження, і ти сказала що потрібно вітати пізно вночі, щоб показати свою увагу. Потім ми не хотіли йти спати, перший раз до 2 ночі разом. В той же ж день я пішов на футбол. І ти мене перший раз чекала. Потім ми відключили обидвоє анкети з ДВ. ",
+          "2021-09-27":
+            "Тут наш день розпочався з розмови про снюс. Далі підбирали веселі імена. В кінці я назвав тебе Яруся. Так то ім'я і закріпилось до сих пір. А ти мене назвала Андрійко. Яруся і Андрійко. Бабінсайдер. Так само говорили про карантин, про 1,5м. Перші сердечка. Перше 'Добраніч❤'. Дедінсайдер і перші жарти що це надовго. Виявилось це не жарти. Розмова до 3 ранку. В той день я перший раз записав тобі відеокружок з вулиці. Перший раз скинув тобі Нічку. ",
+          "2021-09-28":
+            "Тут ми вперше почали обмінюватись побажаннями на новий день і спільними думками щодо відносин. Вітали з новим днем і бажали всього найкращого. Після цього ми обговорили стосунки, і ти згадала, що основним бажанням є здоров'я і бути поруч зі мною, а я зізнався, що не уявляю, як жив без тебе раніше. Вперше обговорили досвід з минулих знайомств. Згадали події, пов'язані зі стосунками, емоціями, так само про те, як сприймали нових людей у своєму житті. Говорили про роздуми над тим, що могло б бути, якби ми б вибрали інших. Я згадав про свої несерйозні стосунки. Говорили що що після 'забивання' на стосунки або інтереси щось нове з’являється в житті. Я вперше показав тобі свої переписки. Мені здалось ти тоді вперше приревнувала. Та і я теж.",
+          "2021-09-29": "",
+          "2021-09-30": "",
+        };
+
+        function showModal(dateStr) {
+          const description =
+            dateDescriptions[dateStr] || "Опис для цього дня ще не доданий.";
+          modalDateInfo.textContent = `Ти натиснула на: ${dateStr}.\n${description}`;
+          modal.style.display = "block";
+          calendarYear.classList.add("disable-interaction");
+        }
+
+        span.onclick = function () {
+          modal.style.display = "none";
+          calendarYear.classList.remove("disable-interaction");
+        };
+
+        window.onclick = function (event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+            calendarYear.classList.remove("disable-interaction");
+          }
+        };
+
+        function renderMonths(startMonthIndex) {
+          const months = [
+            { id: "month-01", date: `${currentYear}-01-01` },
+            { id: "month-02", date: `${currentYear}-02-01` },
+            { id: "month-03", date: `${currentYear}-03-01` },
+            { id: "month-04", date: `${currentYear}-04-01` },
+            { id: "month-05", date: `${currentYear}-05-01` },
+            { id: "month-06", date: `${currentYear}-06-01` },
+            { id: "month-07", date: `${currentYear}-07-01` },
+            { id: "month-08", date: `${currentYear}-08-01` },
+            { id: "month-09", date: `${currentYear}-09-01` },
+            { id: "month-10", date: `${currentYear}-10-01` },
+            { id: "month-11", date: `${currentYear}-11-01` },
+            { id: "month-12", date: `${currentYear}-12-01` },
+          ];
+
+          months.forEach((month, index) => {
+            let calendarEl = document.getElementById(month.id);
+            if (
+              index >= startMonthIndex &&
+              index < startMonthIndex + monthsPerPage
+            ) {
+              calendarEl.style.display = "block";
+
+              if (calendarEl.hasChildNodes()) {
+                calendarEl.innerHTML = "";
+              }
+
+              let calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: "uk",
+                initialView: "dayGridMonth",
+                initialDate: month.date,
+                headerToolbar: {
+                  left: "",
+                  center: "title",
+                  right: "",
+                },
+                height: "auto",
+                selectable: true,
+                editable: false,
+                navLinks: false,
+                dateClick: function (info) {
+                  showModal(info.dateStr);
+                },
+                events: [],
+              });
+              calendar.render();
+            } else {
+              calendarEl.style.display = "none";
+            }
+          });
+
+          yearDisplay.textContent = currentYear;
+        }
+
+        renderMonths(currentMonthIndex);
+
+        document.getElementById("next-months").addEventListener("click", () => {
+          if (currentMonthIndex + monthsPerPage < 12) {
+            currentMonthIndex += monthsPerPage;
+          } else {
+            if (currentYear < endYear) {
+              currentMonthIndex = 0;
+              currentYear += 1;
+            }
+          }
+
+          // Prevent moving past September 2100
+          if (currentYear === endYear && currentMonthIndex >= 9) {
+            currentMonthIndex = 9; // Restrict to September
+          }
+
+          renderMonths(currentMonthIndex);
+        });
+
+        document.getElementById("prev-months").addEventListener("click", () => {
+          if (currentYear === startYear && currentMonthIndex <= 8) {
+            return; // Do nothing, don't go back before September 2021
+          }
+
+          if (currentMonthIndex - monthsPerPage >= 0) {
+            currentMonthIndex -= monthsPerPage;
+          } else {
+            if (currentYear > startYear) {
+              currentMonthIndex = 9;
+              currentYear -= 1;
+            }
+          }
+
+          renderMonths(currentMonthIndex);
+        });
+      });
+    </script>
+  </body>
+</html>
